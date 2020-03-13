@@ -43,7 +43,7 @@ public class Main {
     static ArrayList<Corner> corners = new ArrayList<>();
 
     public static void main(String[] args) {
-        frame.setIconImage(new ImageIcon("src\\Resources\\Icon\\logo3.png").getImage());
+        frame.setIconImage(new ImageIcon(Main.class.getResource("Icon/logo3.png")).getImage());
         frame.setContentPane(new GUI());
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -103,7 +103,7 @@ public class Main {
 
         about.addActionListener(e -> {
             try {
-                new TextDialog("Hakkýnda", new File("src/Resources/About.txt"), new Dimension(500,500));
+                new TextDialog("Hakkýnda", Main.class.getResource("About.html"), new Dimension(500,500));
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
             }
@@ -113,7 +113,7 @@ public class Main {
 
         howToPlay.addActionListener(e -> {
             try {
-                new TextDialog("Nasýl Oynanýr", new File("src/Resources/HowToPlay.txt"), new Dimension(500,500));
+                new TextDialog("Nasýl Oynanýr", Main.class.getResource("HowToPlay.html"), new Dimension(500,500));
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
             }

@@ -3,28 +3,26 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Scanner;
 
 public class TextDialog extends JFrame {
-    TextDialog(String title, File file, Dimension preferredSize) throws FileNotFoundException {
+    TextDialog(String title, URL file, Dimension preferredSize) throws IOException, URISyntaxException {
         BorderLayout layout = new BorderLayout(5,5);
         setLayout(layout);
 
         setTitle(title);
 
-        Scanner s = new Scanner(file);
+        JEditorPane textArea = new JEditorPane();
+        textArea.setPage(file);
+        textArea.setEditable(false);
 
-        StringBuilder read = new StringBuilder();
 
-        while (s.hasNextLine()) {
-            read.append(s.nextLine() + "\n");
-        }
-
-        s.close();
-
-        JTextArea textArea = new JTextArea(read.toString());
         JScrollPane pane = new JScrollPane(textArea);
         add(pane, BorderLayout.CENTER);
+
 
         pane.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(5,5,5,5),
@@ -32,7 +30,6 @@ public class TextDialog extends JFrame {
 
         setAlwaysOnTop(true);
 
-        textArea.setEditable(false);
 
         setPreferredSize(preferredSize);
         pack();
