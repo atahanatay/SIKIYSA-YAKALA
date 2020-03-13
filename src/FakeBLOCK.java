@@ -5,8 +5,6 @@ import java.awt.event.MouseEvent;
 
 public class FakeBLOCK extends JPanel {
     Grids grids = new Grids(0,0);
-    boolean finished = false;
-    boolean returned = false;
 
     FakeBLOCK() {
         setSize(50,50);

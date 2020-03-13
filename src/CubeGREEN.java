@@ -4,8 +4,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class CubeGREEN extends JPanel {
-    int x,y;
-    Grids lastGrids = null;
     boolean activated = true;
     Grids grids = new Grids(0,0);
 
