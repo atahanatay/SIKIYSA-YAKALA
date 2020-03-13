@@ -2,12 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class Main {
-    static String gameName = "<Oyun adý>";
+    static String gameName = "Sýkýysa Yakala";
 
     static JFrame frame = new JFrame();
 
@@ -47,7 +45,7 @@ public class Main {
         frame.setContentPane(new GUI());
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.repaint();
+        repaintAll();
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setTitle(gameName);
@@ -56,14 +54,21 @@ public class Main {
         JMenu settingsMenu = new JMenu("Ayarlar");
         JMenuItem setBlackMovesLimit = new JMenuItem("Siyah hareket limitini ayarla");
 
+
         setBlackMovesLimit.addActionListener(e -> {
             try {
-                blackMovesLimit = Integer.parseInt(JOptionPane.showInputDialog(null, "Hamle limitini girin", "Hamle limitini ayarla", JOptionPane.PLAIN_MESSAGE));
+                int i = Integer.parseInt(JOptionPane.showInputDialog(null, "Hamle limitini girin", "Hamle limitini ayarla", JOptionPane.PLAIN_MESSAGE));
+
+                if (i <= 0) throw new ZeroException();
+
+                blackMovesLimit = i;
                 blackMoves = 0;
 
                 if (turn != 4) label.setText(blackMoves + "/" + blackMovesLimit);
-            } catch (Exception e1) {
+            } catch (NumberFormatException e1) {
                 JOptionPane.showMessageDialog(null, "Lütfen sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
+            } catch (ZeroException e2) {
+                JOptionPane.showMessageDialog(null, "Lütfen 0'dan büyük bir sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -71,12 +76,18 @@ public class Main {
 
         setFakeBlockStageLimit.addActionListener(e -> {
             try {
-                fakeBlockStageLimit = Integer.parseInt(JOptionPane.showInputDialog(null, "Hamle limitini girin", "Hamle limitini ayarla", JOptionPane.PLAIN_MESSAGE));
+                int i = Integer.parseInt(JOptionPane.showInputDialog(null, "Hamle limitini girin", "Hamle limitini ayarla", JOptionPane.PLAIN_MESSAGE));
+                if (i <= 0) throw new ZeroException();
+
+                fakeBlockStageLimit = i;
                 fakeBlockStage = 0;
 
-                if (turn == 4) label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
-            } catch (Exception e1) {
+                if (turn == 4)
+                    label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+            } catch (NumberFormatException e1) {
                 JOptionPane.showMessageDialog(null, "Lütfen sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
+            } catch (ZeroException e2) {
+                JOptionPane.showMessageDialog(null, "Lütfen 0'dan büyük bir sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -103,7 +114,7 @@ public class Main {
 
         about.addActionListener(e -> {
             try {
-                new TextDialog("Hakkýnda", Main.class.getResource("About.html"), new Dimension(500,500));
+                new TextDialog("Hakkýnda", Main.class.getResource("About.html"), new Dimension(500, 500));
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
             }
@@ -113,7 +124,7 @@ public class Main {
 
         howToPlay.addActionListener(e -> {
             try {
-                new TextDialog("Nasýl Oynanýr", Main.class.getResource("HowToPlay.html"), new Dimension(500,500));
+                new TextDialog("Nasýl Oynanýr", Main.class.getResource("HowToPlay.html"), new Dimension(500, 500));
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
             }
@@ -126,8 +137,8 @@ public class Main {
         frame.setJMenuBar(bar);
         frame.pack();
 
-        label.setSize(500,15);
-        label.setLocation(0,0);
+        label.setSize(500, 15);
+        label.setLocation(0, 0);
         label.setHorizontalAlignment(SwingConstants.CENTER);
         frame.getContentPane().add(label);
 
@@ -135,13 +146,13 @@ public class Main {
             Corner c = new Corner();
             corners.add(c);
 
-            if (i == 0) setPos(c, 0,0, 0, 0);
-            else if (i == 1) setPos(c, 490,0, 4, 0);
-            else if (i == 2) setPos(c, 490,490,4,4);
-            else setPos(c, 0,490,0,4);
+            if (i == 0) setPos(c, 0, 0, 0, 0);
+            else if (i == 1) setPos(c, 490, 0, 4, 0);
+            else if (i == 2) setPos(c, 490, 490, 4, 4);
+            else setPos(c, 0, 490, 0, 4);
         }
 
-        frame.repaint();
+        repaintAll();
 
         frame.addKeyListener(new KeyAdapter() {
             @Override
@@ -149,9 +160,11 @@ public class Main {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_6 && e.isControlDown()) {
                     openDeveloperMode();
-                }
-                else if (e.getKeyCode() == KeyEvent.VK_O) {
-                    if (searchingBlue) fakeBlockStage = fakeBlockStageLimit;
+                } else if (e.getKeyCode() == KeyEvent.VK_O) {
+                    if (searchingBlue) {
+                        fakeBlockStage = fakeBlockStageLimit;
+                        tryFind();
+                    }
                 }
             }
         });
@@ -166,7 +179,7 @@ public class Main {
 
     public static void startInit() {
         setPos(redCube, 1, 2);
-        setPos(blueCube,3,2);
+        setPos(blueCube, 3, 2);
 
 
         for (int i = 0; i < blackCubes.size(); i++) {
@@ -212,7 +225,7 @@ public class Main {
             developerMode = true;
             setTurn(0);
         }
-        frame.repaint();
+        repaintAll();
     }
 
     public static void setTurn(int t) {
@@ -231,9 +244,8 @@ public class Main {
                 cubeBLACK.fSelectable = false;
             });
 
-            frame.repaint();
-        }
-        else if (t == 1) {
+            repaintAll();
+        } else if (t == 1) {
             blackCubes.forEach(cubeBLACK -> {
                 cubeBLACK.selectable = true;
                 cubeBLACK.fSelectable = false;
@@ -241,9 +253,8 @@ public class Main {
             redCube.selectable = false;
             blueCube.selectable = false;
 
-            frame.repaint();
-        }
-        else if (t == 2) {
+            repaintAll();
+        } else if (t == 2) {
             blackCubes.forEach(cubeBLACK -> {
                 cubeBLACK.selectable = true;
                 cubeBLACK.fSelectable = true;
@@ -251,9 +262,8 @@ public class Main {
             redCube.selectable = false;
             blueCube.selectable = false;
 
-            frame.repaint();
-        }
-        else if (t == 3) {
+            repaintAll();
+        } else if (t == 3) {
             blackCubes.forEach(cubeBLACK -> {
                 cubeBLACK.selectable = true;
                 cubeBLACK.fSelectable = false;
@@ -261,9 +271,8 @@ public class Main {
             redCube.selectable = true;
             blueCube.selectable = true;
 
-            frame.repaint();
-        }
-        else if (t == 4) {
+            repaintAll();
+        } else if (t == 4) {
             blackCubes.forEach(cubeBLACK -> {
                 cubeBLACK.selectable = false;
                 cubeBLACK.fSelectable = false;
@@ -271,9 +280,8 @@ public class Main {
             redCube.selectable = false;
             blueCube.selectable = false;
 
-            frame.repaint();
-        }
-        else if (t == 5) {
+            repaintAll();
+        } else if (t == 5) {
             blackCubes.forEach(cubeBLACK -> {
                 cubeBLACK.selectable = false;
                 cubeBLACK.fSelectable = false;
@@ -281,84 +289,91 @@ public class Main {
             redCube.selectable = false;
             blueCube.selectable = false;
 
-            frame.repaint();
+            repaintAll();
         }
     }
 
     public static void setPos(CubeBLUE p, int x, int y) {
-        p.setLocation((x*100)+25,(y*100)+25);
-        p.grids.setValues(x,y);
+        p.setLocation((x * 100) + 25, (y * 100) + 25);
+        p.grids.setValues(x, y);
         frame.getContentPane().add(p);
     }
 
     public static void setPos(CubeRED p, int x, int y) {
-        p.setLocation((x*100)+25,(y*100)+25);
-        p.grids.setValues(x,y);
+        p.setLocation((x * 100) + 25, (y * 100) + 25);
+        p.grids.setValues(x, y);
         frame.getContentPane().add(p);
     }
 
     public static void setPos(CubeBLACK p, int x, int y) {
-        p.setLocation((x*100)+25,(y*100)+25);
-        p.grids.setValues(x,y);
+        p.setLocation((x * 100) + 25, (y * 100) + 25);
+        p.grids.setValues(x, y);
         frame.getContentPane().add(p);
     }
 
     public static void setPos(CubeGREEN p, int x, int y) {
-        p.setLocation((x*100)+25,(y*100)+25);
-        p.grids.setValues(x,y);
+        p.setLocation((x * 100) + 25, (y * 100) + 25);
+        p.grids.setValues(x, y);
         frame.getContentPane().add(p);
     }
 
     public static void setPos(Corner p, int x, int y, int x1, int y1) {
-        p.setLocation(x,y);
-        p.grids.setValues(x1,y1);
+        p.setLocation(x, y);
+        p.grids.setValues(x1, y1);
         frame.getContentPane().add(p);
     }
 
     public static void setPos(FakeBLOCK p, int x, int y) {
-        p.setLocation((x*100)+25,(y*100)+25);
-        p.grids.setValues(x,y);
+        p.setLocation((x * 100) + 25, (y * 100) + 25);
+        p.grids.setValues(x, y);
         frame.getContentPane().add(p);
     }
 
     public static void setGreenCubes(int type, int x, int y) {
         if (type == RED_CUBE) {
-            if (controlGrid(redCube.grids.x + 1, redCube.grids.y)) setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y);
-            if (controlGrid(redCube.grids.x - 1, redCube.grids.y)) setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y);
-            if (controlGrid(redCube.grids.x, redCube.grids.y + 1)) setPos(new CubeGREEN(), redCube.grids.x, redCube.grids.y + 1);
-            if (controlGrid(redCube.grids.x, redCube.grids.y - 1)) setPos(new CubeGREEN(), redCube.grids.x, redCube.grids.y - 1);
-            if (controlGrid(redCube.grids.x + 1, redCube.grids.y + 1)) setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y + 1);
-            if (controlGrid(redCube.grids.x - 1, redCube.grids.y - 1)) setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y - 1);
-            if (controlGrid(redCube.grids.x + 1, redCube.grids.y - 1)) setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y - 1);
-            if (controlGrid(redCube.grids.x - 1, redCube.grids.y + 1)) setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y + 1);
+            if (controlGrid(redCube.grids.x + 1, redCube.grids.y))
+                setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y);
+            if (controlGrid(redCube.grids.x - 1, redCube.grids.y))
+                setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y);
+            if (controlGrid(redCube.grids.x, redCube.grids.y + 1))
+                setPos(new CubeGREEN(), redCube.grids.x, redCube.grids.y + 1);
+            if (controlGrid(redCube.grids.x, redCube.grids.y - 1))
+                setPos(new CubeGREEN(), redCube.grids.x, redCube.grids.y - 1);
+            if (controlGrid(redCube.grids.x + 1, redCube.grids.y + 1))
+                setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y + 1);
+            if (controlGrid(redCube.grids.x - 1, redCube.grids.y - 1))
+                setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y - 1);
+            if (controlGrid(redCube.grids.x + 1, redCube.grids.y - 1))
+                setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y - 1);
+            if (controlGrid(redCube.grids.x - 1, redCube.grids.y + 1))
+                setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y + 1);
             frame.getContentPane().repaint();
 
-            frame.repaint();
-        }
-        else if (type == BLUE_CUBE || type == BLACK_CUBE || type == FAKE_BLOCK) {
+            repaintAll();
+        } else if (type == BLUE_CUBE || type == BLACK_CUBE || type == FAKE_BLOCK) {
             for (int i = x + 1; i < 5; i++) {
-                if (controlGridWithBlock(i,y) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(i, y) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(i, y)) break;
                 else setPos(new CubeGREEN(), i, y);
             }
 
             for (int i = x - 1; i >= 0; i--) {
-                if (controlGridWithBlock(i,y) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(i, y) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(i, y)) break;
                 else setPos(new CubeGREEN(), i, y);
             }
 
             for (int i = y + 1; i < 5; i++) {
-                if (controlGridWithBlock(x,i) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x, i) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x, i)) break;
                 else setPos(new CubeGREEN(), x, i);
             }
 
             for (int i = y - 1; i >= 0; i--) {
-                if (controlGridWithBlock(x,i) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x, i) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x, i)) break;
                 else setPos(new CubeGREEN(), x, i);
@@ -370,7 +385,7 @@ public class Main {
             x1 = x + 1;
             y1 = y + 1;
             while (x1 < 5 && y1 < 5) {
-                if (controlGridWithBlock(x1,y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x1, y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x1, y1)) break;
                 else setPos(new CubeGREEN(), x1, y1);
@@ -382,7 +397,7 @@ public class Main {
             x1 = x - 1;
             y1 = y - 1;
             while (x1 >= 0 && y1 >= 0) {
-                if (controlGridWithBlock(x1,y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x1, y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x1, y1)) break;
                 else setPos(new CubeGREEN(), x1, y1);
@@ -394,7 +409,7 @@ public class Main {
             x1 = x + 1;
             y1 = y - 1;
             while (x1 < 5 && y1 >= 0) {
-                if (controlGridWithBlock(x1,y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x1, y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x1, y1)) break;
                 else setPos(new CubeGREEN(), x1, y1);
@@ -406,7 +421,7 @@ public class Main {
             x1 = x - 1;
             y1 = y + 1;
             while (x1 >= 0 && y1 < 5) {
-                if (controlGridWithBlock(x1,y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
+                if (controlGridWithBlock(x1, y1) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
                 if (!controlGrid(x1, y1)) break;
                 else setPos(new CubeGREEN(), x1, y1);
@@ -417,7 +432,7 @@ public class Main {
         } else if (type == DEVELOPER) {
             for (int x1 = 0; x1 < 5; x1++) {
                 for (int y1 = 0; y1 < 5; y1++) {
-                    if (controlGrid(x1,y1)) setPos(new CubeGREEN(), x1, y1);
+                    if (controlGrid(x1, y1)) setPos(new CubeGREEN(), x1, y1);
                 }
             }
         } else if (type == NO) {
@@ -449,27 +464,27 @@ public class Main {
             if (blackMoves == blackMovesLimit) blackMoves = 0;
 
             for (CubeBLACK cb : blackCubes) cb.locked = false;
-        }
-        else if (selected == BLACK_CUBE) {
+        } else if (selected == BLACK_CUBE) {
 
-            if (!selectedBlack.fSelectable) selectedBlack.lastGrids = new Grids(selectedBlack.grids.x, selectedBlack.grids.y);
+            if (!selectedBlack.fSelectable)
+                selectedBlack.lastGrids = new Grids(selectedBlack.grids.x, selectedBlack.grids.y);
 
             setPos(selectedBlack, g.grids.x, g.grids.y);
             if (turn != 2 && turn != 3) blackMoves++;
             else if (turn != 3) selectedBlack.locked = true;
 
-            frame.repaint();
-        }
-        else if (selected == FAKE_BLOCK) {
+            repaintAll();
+        } else if (selected == FAKE_BLOCK) {
             setPos(fakeBlock, g.grids.x, g.grids.y);
 
             fakeBlockStage++;
             label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+            tryFind();
 
-            frame.repaint();
+            repaintAll();
         }
 
-        setGreenCubes(NO, 0,0);
+        setGreenCubes(NO, 0, 0);
         deSelectAll();
 
         if (turn == 0) setTurn(1);
@@ -562,7 +577,6 @@ public class Main {
     }
 
 
-
     public static void findBlue() {
         fakeBlockStage = 0;
 
@@ -584,19 +598,13 @@ public class Main {
         setPos(fakeBlock, redCube.grids.x, redCube.grids.y);
 
         requestSelectFakeBlock();
+    }
 
-        new Thread(() -> {
-            while (!(fakeBlockStage == fakeBlockStageLimit || foundBlue)) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
+    public static void tryFind() {
+        if (fakeBlockStage == fakeBlockStageLimit || foundBlue) {
             searchingBlue = false;
             continueBlue();
-        }).start();
+        }
     }
 
     public static void requestSelectFakeBlock() {
@@ -611,14 +619,14 @@ public class Main {
             selected = RED_CUBE;
             frame.getContentPane().repaint();
 
-            setGreenCubes(RED_CUBE,0,0);
+            setGreenCubes(RED_CUBE, 0, 0);
         } else if (turn == 3) {
             deSelectAll();
             redCube.selected = true;
             selected = RED_CUBE;
             frame.getContentPane().repaint();
 
-            setGreenCubes(DEVELOPER,0,0);
+            setGreenCubes(DEVELOPER, 0, 0);
         }
     }
 
@@ -630,7 +638,7 @@ public class Main {
             selected = BLUE_CUBE;
             frame.getContentPane().repaint();
 
-            setGreenCubes(BLUE_CUBE, blueCube.grids.x,blueCube.grids.y);
+            setGreenCubes(BLUE_CUBE, blueCube.grids.x, blueCube.grids.y);
         } else if (turn == 3) {
             deSelectAll();
             blueCube.selected = true;
@@ -640,6 +648,7 @@ public class Main {
             setGreenCubes(DEVELOPER, 0, 0);
         } else if (turn == 4 && blueCube.selectableWithFakeBlock) {
             foundBlue = true;
+            tryFind();
         }
     }
 
@@ -659,7 +668,7 @@ public class Main {
             selectedBlack = b;
             frame.getContentPane().repaint();
 
-            setGreenCubes(DEVELOPER, 0,0);
+            setGreenCubes(DEVELOPER, 0, 0);
         }
     }
 
@@ -668,15 +677,14 @@ public class Main {
         blackCubes.forEach(cubeBLACK -> cubeBLACK.selected = false);
         blueCube.selected = false;
 
-        setGreenCubes(NO,0,0);
+        setGreenCubes(NO, 0, 0);
 
         frame.getContentPane().repaint();
     }
 
     public static void moveToBlue() {
         findBlue();
-
-        frame.repaint();
+        repaintAll();
     }
 
     public static void continueBlue() {
@@ -689,7 +697,7 @@ public class Main {
             setPos(redCube, blueCube.grids.x, blueCube.grids.y);
             setPos(blueCube, x, y);
 
-            setGreenCubes(NO, 0,0);
+            setGreenCubes(NO, 0, 0);
             deSelectAll();
 
             for (Corner c : corners) {
@@ -706,7 +714,7 @@ public class Main {
         } else {
             setPos(redCube, redCube.grids.x, redCube.grids.y);
 
-            setGreenCubes(NO, 0,0);
+            setGreenCubes(NO, 0, 0);
             deSelectAll();
 
             for (Component c : frame.getContentPane().getComponents()) {
