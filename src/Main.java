@@ -1,8 +1,10 @@
+import javax.sound.sampled.Line;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
 
 public class Main {
     static String gameName = "Sýkýysa Yakala";
@@ -42,20 +44,22 @@ public class Main {
     static ArrayList<CubeBLACK> blackCubes = new ArrayList<>();
     static ArrayList<Corner> corners = new ArrayList<>();
 
+    static GUI gui = new GUI();
+
     public static void main(String[] args) {
+
         frame.setIconImage(new ImageIcon(Main.class.getResource("Icon/logo3.png")).getImage());
-        frame.setContentPane(new GUI());
+        frame.setContentPane(gui);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        repaintAll();
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setTitle(gameName);
+        repaintAll();
 
         JMenuBar bar = new JMenuBar();
         JMenu settingsMenu = new JMenu("Ayarlar");
         JMenuItem setBlackMovesLimit = new JMenuItem("Siyah hareket limitini ayarla");
-
 
         setBlackMovesLimit.addActionListener(e -> {
             try {
@@ -139,10 +143,21 @@ public class Main {
         frame.setJMenuBar(bar);
         frame.pack();
 
-        label.setSize(500, 15);
-        label.setLocation(0, 0);
+        label.setSize(200, 15);
+        label.setLocation(150, 0);
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.getContentPane().add(label);
+        label.setFont(new Font(label.getFont().getName(), Font.BOLD, label.getFont().getSize()));
+        label.setForeground(Color.RED);
+        label.setBackground(frame.getBackground());
+        label.setOpaque(true);
+
+        Lines lines = new Lines();
+
+        gui.add(label);
+        gui.add(lines);
+
+        gui.setLayer(label, 0);
+        gui.setLayer(lines, -1);
 
         for (int i = 0; i < 4; i++) {
             Corner c = new Corner();
@@ -309,37 +324,42 @@ public class Main {
     public static void setPos(CubeBLUE p, int x, int y) {
         p.setLocation((x * 100) + 25, (y * 100) + 25);
         p.grids.setValues(x, y);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
+        gui.moveToFront(p);
     }
 
     public static void setPos(CubeRED p, int x, int y) {
         p.setLocation((x * 100) + 25, (y * 100) + 25);
         p.grids.setValues(x, y);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
+        gui.moveToFront(p);
     }
 
     public static void setPos(CubeBLACK p, int x, int y) {
         p.setLocation((x * 100) + 25, (y * 100) + 25);
         p.grids.setValues(x, y);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
     }
 
     public static void setPos(CubeGREEN p, int x, int y) {
         p.setLocation((x * 100) + 25, (y * 100) + 25);
         p.grids.setValues(x, y);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
+        gui.moveToFront(p);
     }
 
     public static void setPos(Corner p, int x, int y, int x1, int y1) {
         p.setLocation(x, y);
         p.grids.setValues(x1, y1);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
+        gui.moveToFront(p);
     }
 
     public static void setPos(FakeBLOCK p, int x, int y) {
         p.setLocation((x * 100) + 25, (y * 100) + 25);
         p.grids.setValues(x, y);
-        frame.getContentPane().add(p);
+        gui.add(p, 3);
+        gui.moveToFront(p);
     }
 
     public static void setGreenCubes(int type, int x, int y) {
@@ -360,7 +380,7 @@ public class Main {
                 setPos(new CubeGREEN(), redCube.grids.x + 1, redCube.grids.y - 1);
             if (controlGrid(redCube.grids.x - 1, redCube.grids.y + 1))
                 setPos(new CubeGREEN(), redCube.grids.x - 1, redCube.grids.y + 1);
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             repaintAll();
         } else if (type == BLUE_CUBE || type == BLACK_CUBE || type == FAKE_BLOCK) {
@@ -452,15 +472,15 @@ public class Main {
             }
         } else if (type == NO) {
             removeGreens();
-            frame.getContentPane().repaint();
+            gui.repaint();
         }
 
-        frame.getContentPane().repaint();
+        gui.repaint();
     }
 
     public static void removeGreens() {
-        for (Component comp : frame.getContentPane().getComponents()) {
-            if (comp.getClass().getSimpleName().equals("CubeGREEN")) frame.getContentPane().remove(comp);
+        for (Component comp : gui.getComponents()) {
+            if (comp.getClass().getSimpleName().equals("CubeGREEN")) gui.remove(comp);
         }
     }
 
@@ -517,7 +537,7 @@ public class Main {
             if (c.grids.x == redCube.grids.x && c.grids.y == redCube.grids.y) c.clicked = true;
         }
 
-        frame.getContentPane().repaint();
+        gui.repaint();
 
         if (selected == FAKE_BLOCK) {
             requestSelectFakeBlock();
@@ -548,9 +568,12 @@ public class Main {
     }
 
     public static void repaintAll() {
+        frame.revalidate();
         frame.repaint();
         redCube.repaint();
         blueCube.repaint();
+        gui.revalidate();
+        gui.repaint();
         blackCubes.forEach(CubeBLACK::repaint);
     }
 
@@ -618,11 +641,11 @@ public class Main {
 
         redCube.lastGrids = redCube.grids;
 
-        for (Component c : frame.getContentPane().getComponents()) {
-            if (c instanceof CubeRED) frame.getContentPane().remove(c);
+        for (Component c : gui.getComponents()) {
+            if (c instanceof CubeRED) gui.remove(c);
         }
 
-        frame.add(fakeBlock);
+        gui.add(fakeBlock);
 
         setPos(fakeBlock, redCube.grids.x, redCube.grids.y);
 
@@ -646,14 +669,14 @@ public class Main {
             deSelectAll();
             redCube.selected = true;
             selected = RED_CUBE;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(RED_CUBE, 0, 0);
         } else if (turn == 3) {
             deSelectAll();
             redCube.selected = true;
             selected = RED_CUBE;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
         }
@@ -665,14 +688,14 @@ public class Main {
             deSelectAll();
             blueCube.selected = true;
             selected = BLUE_CUBE;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(BLUE_CUBE, blueCube.grids.x, blueCube.grids.y);
         } else if (turn == 3) {
             deSelectAll();
             blueCube.selected = true;
             selected = BLUE_CUBE;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
         } else if (turn == 4 && blueCube.selectableWithFakeBlock) {
@@ -687,7 +710,7 @@ public class Main {
             b.selected = true;
             selected = BLACK_CUBE;
             selectedBlack = b;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(BLACK_CUBE, b.grids.x, b.grids.y);
         } else if (turn == 3) {
@@ -695,7 +718,7 @@ public class Main {
             b.selected = true;
             selected = BLACK_CUBE;
             selectedBlack = b;
-            frame.getContentPane().repaint();
+            gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
         }
@@ -708,7 +731,7 @@ public class Main {
 
         setGreenCubes(NO, 0, 0);
 
-        frame.getContentPane().repaint();
+        gui.repaint();
     }
 
     public static void moveToBlue() {
@@ -738,11 +761,11 @@ public class Main {
             }
 
 
-            for (Component c : frame.getContentPane().getComponents()) {
-                if (c instanceof FakeBLOCK) frame.getContentPane().remove(c);
+            for (Component c : gui.getComponents()) {
+                if (c instanceof FakeBLOCK) gui.remove(c);
             }
 
-            frame.getContentPane().repaint();
+            gui.repaint();
             setTurn(1);
         } else {
             lastSelectedFakeBlock = true;
@@ -752,11 +775,11 @@ public class Main {
             setGreenCubes(NO, 0, 0);
             deSelectAll();
 
-            for (Component c : frame.getContentPane().getComponents()) {
-                if (c instanceof FakeBLOCK) frame.getContentPane().remove(c);
+            for (Component c : gui.getComponents()) {
+                if (c instanceof FakeBLOCK) gui.remove(c);
             }
 
-            frame.getContentPane().repaint();
+            gui.repaint();
             setTurn(1);
 
             JOptionPane.showMessageDialog(null, "Kýrmýzý maviye ulaþamaz", "Hata", JOptionPane.PLAIN_MESSAGE);
