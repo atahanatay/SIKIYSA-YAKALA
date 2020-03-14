@@ -238,7 +238,9 @@ public class Main {
     }
 
     public static void setTurn(int t) {
-        if (blackMoves == blackMovesLimit) {
+        if (t != 1) for (CubeBLACK cb : blackCubes) cb.locked = false;
+
+        if (blackMoves == blackMovesLimit && t != 5) {
             t = 2;
             blackMoves = 0;
         }
@@ -530,6 +532,7 @@ public class Main {
     }
 
     public static void blackWin() {
+        label.setText("Siyah Takým Kazandý!");
         CubeBLACK.win = true;
         CubeBLACK.t.start();
         setTurn(5);
@@ -537,6 +540,7 @@ public class Main {
     }
 
     public static void redWin() {
+        label.setText("Kýrmýzý Takým Kazandý!");
         CubeRED.win = true;
         CubeRED.t.start();
         setTurn(5);
