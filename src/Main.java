@@ -181,6 +181,11 @@ public class Main {
         setPos(redCube, 1, 2);
         setPos(blueCube, 3, 2);
 
+        blackMoves = 0;
+        fakeBlockStage = 0;
+        selected = 0;
+
+        label.setText(blackMoves + "/" + blackMovesLimit);
 
         for (int i = 0; i < blackCubes.size(); i++) {
             CubeBLACK black = blackCubes.get(i);
