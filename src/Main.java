@@ -1,7 +1,10 @@
+import javax.print.attribute.standard.Sides;
+import javax.sound.midi.SoundbankResource;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 
@@ -44,11 +47,88 @@ public class Main {
     static CubeBLUE blueCube = new CubeBLUE();
     static ArrayList<CubeBLACK> blackCubes = new ArrayList<>();
     static ArrayList<Corner> corners = new ArrayList<>();
+    static ArrayList<CubeGREEN> greenCubes = new ArrayList<>();
 
     static GUI gui = new GUI();
 
-    public static void main(String[] args) {
+    static int _level = 1;
+    static int locationX = 0;
+    static int locationY = 0;
+    static int moveX = 0;
+    static int moveY = 0;
+    static String _beforeText;
 
+    static KeyListener listener = new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            super.keyTyped(e);
+
+            int num;
+
+            if (e.getKeyCode() >= 0x60 && e.getKeyCode() <= 0x64 && _level != 3) {
+                num = e.getKeyCode() - 96;
+
+                if (_level == 1) locationX = num;
+                else if (_level == 2) locationY = num;
+                else if (_level == 4) moveX = num;
+                else if (_level == 5) moveY = num;
+
+                _level++;
+            } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                if (_level > 1 && _level != 7 && turn != 4) {
+                    _level--;
+                } else if (_level > 4 && turn == 4 && _level != 7) {
+                    _level--;
+                } else if (turn == 4 && _level >= 7) {
+                    _level = 4;
+                } else if (_level >= 7) {
+                    _level = 1;
+                }
+                System.out.println(_level);
+            } else if ((_level == 3 || _level == 6) && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                _level++;
+            }
+
+            if (_level == 4) {
+                Object a = controlGridWithBlock(locationX, locationY);
+
+                if (a instanceof CubeRED) requestSelectRed();
+                else if (a instanceof CubeBLUE) requestSelectBlue();
+                else if (a instanceof CubeBLACK) requestSelectBlack((CubeBLACK) a);
+            } else if (_level == 7) {
+                Object a = controlGridWithBlock(moveX, moveY);
+
+                if (a instanceof CubeGREEN) moveCube((CubeGREEN) a);
+                else if (a instanceof CubeBLUE) requestSelectBlue();
+            }
+
+            labelLevel();
+        }
+    };
+
+    public static void labelLevel() {
+        if (_level == 1) {
+            label.setText(_beforeText);
+        } else if (_level == 2) {
+            label.setText(_beforeText + " : " + locationX + "x");
+        } else if (_level == 3) {
+            label.setText(_beforeText + " : " + locationX + "x" + locationY);
+        } else if (_level == 4) {
+            label.setText(_beforeText + " : " + locationX + "x" + locationY + " ->");
+        } else if (_level == 5) {
+            label.setText(_beforeText + " : " + locationX + "x" + locationY + " -> " + moveX);
+        } else if (_level == 6) {
+            label.setText(_beforeText + " : " + locationX + "x" + locationY + " -> " + moveX + "x" + moveY);
+        } else if (_level == 7) {
+            label.setText(_beforeText + " : " + locationX + "x" + locationY + " -> " + moveX + "x" + moveY + "*");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(Main::start);
+    }
+
+    public static void start() {
         frame.setIconImage(new ImageIcon(Main.class.getResource("Icon/logo3.png")).getImage());
         frame.setContentPane(gui);
         frame.setVisible(true);
@@ -57,6 +137,8 @@ public class Main {
         frame.setResizable(false);
         frame.setTitle(gameName);
         repaintAll();
+
+        frame.addKeyListener(listener);
 
         JMenuBar bar = new JMenuBar();
         JMenu settingsMenu = new JMenu("Ayarlar");
@@ -71,7 +153,10 @@ public class Main {
                 blackMovesLimit = i;
                 blackMoves = 0;
 
-                if (turn != 4) label.setText(blackMoves + "/" + blackMovesLimit);
+                if (turn != 4) {
+                    _beforeText = blackMoves + "/" + blackMovesLimit;
+                    labelLevel();
+                }
             } catch (NumberFormatException e1) {
                 JOptionPane.showMessageDialog(null, "Lütfen sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
             } catch (ZeroException e2) {
@@ -89,8 +174,10 @@ public class Main {
                 fakeBlockStageLimit = i;
                 fakeBlockStage = 0;
 
-                if (turn == 4)
-                    label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+                if (turn == 4) {
+                    _beforeText = "Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal";
+                    labelLevel();
+                }
             } catch (NumberFormatException e1) {
                 JOptionPane.showMessageDialog(null, "Lütfen sayý giriniz", "Hata", JOptionPane.ERROR_MESSAGE);
             } catch (ZeroException e2) {
@@ -144,10 +231,10 @@ public class Main {
         frame.setJMenuBar(bar);
         frame.pack();
 
-        label.setSize(200, 15);
-        label.setLocation(150, 0);
+        label.setSize(400, 15);
+        label.setLocation(50, 0);
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setFont(new Font(label.getFont().getName(), Font.BOLD, label.getFont().getSize()));
+        label.setFont(new Font("Monospaced", Font.BOLD, label.getFont().getSize()));
         label.setForeground(Color.RED);
         label.setBackground(frame.getBackground());
         label.setOpaque(true);
@@ -201,7 +288,8 @@ public class Main {
         fakeBlockStage = 0;
         selected = 0;
 
-        label.setText(blackMoves + "/" + blackMovesLimit);
+        _beforeText = blackMoves + "/" + blackMovesLimit;
+        labelLevel();
 
         for (int i = 0; i < blackCubes.size(); i++) {
             CubeBLACK black = blackCubes.get(i);
@@ -479,7 +567,7 @@ public class Main {
 
     public static void removeGreens() {
         for (Component comp : gui.getComponents()) {
-            if (comp.getClass().getSimpleName().equals("CubeGREEN")) gui.remove(comp);
+            if (comp instanceof CubeGREEN) gui.remove(comp);
         }
     }
 
@@ -512,7 +600,8 @@ public class Main {
             setPos(fakeBlock, g.grids.x, g.grids.y);
 
             fakeBlockStage++;
-            label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+            _beforeText = "Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal";
+            labelLevel();
 
             System.out.println("trying find...");
             tryFind();
@@ -530,7 +619,10 @@ public class Main {
 
         deSelectAll();
 
-        System.out.println("It continues");
+        moveX = g.grids.x;
+        moveY = g.grids.y;
+        _level = 7;
+        labelLevel();
 
         for (Corner c : corners) {
             if (c.grids.x == redCube.grids.x && c.grids.y == redCube.grids.y) c.clicked = true;
@@ -541,7 +633,8 @@ public class Main {
         if (selected == FAKE_BLOCK) {
             requestSelectFakeBlock();
         } else {
-            label.setText(blackMoves + "/" + blackMovesLimit);
+            _beforeText = blackMoves + "/" + blackMovesLimit;
+            labelLevel();
             deSelectAll();
         }
 
@@ -614,11 +707,20 @@ public class Main {
     }
 
     public static JPanel controlGridWithBlock(int x, int y) {
-        if (redCube.grids.x == x && redCube.grids.y == y) return redCube;
-        else if (blueCube.grids.x == x && blueCube.grids.y == y) return blueCube;
+        if (redCube.grids.x == x && redCube.grids.y == y) {
+            return redCube;
+        } else if (blueCube.grids.x == x && blueCube.grids.y == y) return blueCube;
         else {
             for (CubeBLACK blackCube : blackCubes) {
                 if (blackCube.grids.x == x && blackCube.grids.y == y) return blackCube;
+            }
+
+            for (Component c : gui.getComponents()) {
+                if (c instanceof CubeGREEN) {
+                    if (((CubeGREEN) c).grids.x == x && ((CubeGREEN) c).grids.y == y) {
+                        return (CubeGREEN) c;
+                    }
+                }
             }
 
             if (x >= 0 && x < 5 && y >= 0 && y < 5) return new JPanel();
@@ -633,7 +735,8 @@ public class Main {
         searchingBlue = true;
         foundBlue = false;
 
-        label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+        _beforeText = "Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal";
+        labelLevel();
 
         setTurn(4);
 
@@ -670,6 +773,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(RED_CUBE, 0, 0);
+
+            locationX = redCube.grids.x;
+            locationY = redCube.grids.y;
+            _level = 4;
+            labelLevel();
         } else if (turn == 3) {
             deSelectAll();
             redCube.selected = true;
@@ -677,6 +785,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
+
+            locationX = redCube.grids.x;
+            locationY = redCube.grids.y;
+            _level = 4;
+            labelLevel();
         }
     }
 
@@ -689,6 +802,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(BLUE_CUBE, blueCube.grids.x, blueCube.grids.y);
+
+            locationX = blueCube.grids.x;
+            locationY = blueCube.grids.y;
+            _level = 4;
+            labelLevel();
         } else if (turn == 3) {
             deSelectAll();
             blueCube.selected = true;
@@ -696,6 +814,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
+
+            locationX = blueCube.grids.x;
+            locationY = blueCube.grids.y;
+            _level = 4;
+            labelLevel();
         } else if (turn == 4 && blueCube.selectableWithFakeBlock) {
             foundBlue = true;
             tryFind();
@@ -711,6 +834,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(BLACK_CUBE, b.grids.x, b.grids.y);
+
+            locationX = b.grids.x;
+            locationY = b.grids.y;
+            _level = 4;
+            labelLevel();
         } else if (turn == 3) {
             deSelectAll();
             b.selected = true;
@@ -719,6 +847,11 @@ public class Main {
             gui.repaint();
 
             setGreenCubes(DEVELOPER, 0, 0);
+
+            locationX = b.grids.x;
+            locationY = b.grids.y;
+            _level = 4;
+            labelLevel();
         }
     }
 
@@ -742,7 +875,8 @@ public class Main {
 
         selected = NO;
 
-        label.setText(blackMoves + "/" + blackMovesLimit);
+        _beforeText = blackMoves + "/" + blackMovesLimit;
+        labelLevel();
 
         if (foundBlue) {
             int x = redCube.grids.x;
