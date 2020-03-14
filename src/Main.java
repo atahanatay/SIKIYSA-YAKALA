@@ -715,7 +715,6 @@ public class Main {
     public static void continueBlue() {
         System.out.println("continue blue");
 
-        lastSelectedFakeBlock = true;
         selected = NO;
 
         label.setText(blackMoves + "/" + blackMovesLimit);
@@ -742,6 +741,8 @@ public class Main {
             frame.getContentPane().repaint();
             setTurn(1);
         } else {
+            lastSelectedFakeBlock = true;
+
             setPos(redCube, redCube.grids.x, redCube.grids.y);
 
             setGreenCubes(NO, 0, 0);
