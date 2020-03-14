@@ -18,6 +18,8 @@ public class Main {
 
     static boolean developerMode = false;
 
+    static boolean lastSelectedFakeBlock = false;
+
     static boolean foundBlue = false;
     static boolean searchingBlue = false;
 
@@ -211,6 +213,8 @@ public class Main {
 
         setTurn(0);
 
+        blueCube.selectableWithFakeBlock = false;
+
         repaintAll();
     }
 
@@ -240,6 +244,8 @@ public class Main {
         }
 
         turn = t;
+
+        System.out.println(t);
 
         if (t == 0) {
             redCube.selectable = true;
@@ -356,6 +362,8 @@ public class Main {
 
             repaintAll();
         } else if (type == BLUE_CUBE || type == BLACK_CUBE || type == FAKE_BLOCK) {
+            blueCube.selectableWithFakeBlock = false;
+
             for (int i = x + 1; i < 5; i++) {
                 if (controlGridWithBlock(i, y) instanceof CubeBLUE) blueCube.selectableWithFakeBlock = true;
 
@@ -484,17 +492,24 @@ public class Main {
 
             fakeBlockStage++;
             label.setText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
+
+            System.out.println("trying find...");
             tryFind();
 
             repaintAll();
         }
 
-        setGreenCubes(NO, 0, 0);
+        if (!lastSelectedFakeBlock) {
+            if (turn == 0) setTurn(1);
+            else if (turn == 1) setTurn(0);
+            else if (turn == 2) setTurn(1);
+        }
+
+        lastSelectedFakeBlock = false;
+
         deSelectAll();
 
-        if (turn == 0) setTurn(1);
-        else if (turn == 1) setTurn(0);
-        else if (turn == 2) setTurn(1);
+        System.out.println("It continues");
 
         for (Corner c : corners) {
             if (c.grids.x == redCube.grids.x && c.grids.y == redCube.grids.y) c.clicked = true;
@@ -502,8 +517,13 @@ public class Main {
 
         frame.getContentPane().repaint();
 
-        if (selected == FAKE_BLOCK) requestSelectFakeBlock();
-        else label.setText(blackMoves + "/" + blackMovesLimit);
+        if (selected == FAKE_BLOCK) {
+            requestSelectFakeBlock();
+        }
+        else {
+            label.setText(blackMoves + "/" + blackMovesLimit);
+            deSelectAll();
+        }
 
         if (!controlAround()) blackWin();
         if (controlCorners()) redWin();
@@ -693,6 +713,11 @@ public class Main {
     }
 
     public static void continueBlue() {
+        System.out.println("continue blue");
+
+        lastSelectedFakeBlock = true;
+        selected = NO;
+
         label.setText(blackMoves + "/" + blackMovesLimit);
 
         if (foundBlue) {
