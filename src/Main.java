@@ -1,4 +1,3 @@
-import javax.sound.sampled.Line;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -21,6 +20,8 @@ public class Main {
     static boolean developerMode = false;
 
     static boolean lastSelectedFakeBlock = false;
+
+    static Lines lines = new Lines();
 
     static boolean foundBlue = false;
     static boolean searchingBlue = false;
@@ -150,8 +151,6 @@ public class Main {
         label.setForeground(Color.RED);
         label.setBackground(frame.getBackground());
         label.setOpaque(true);
-
-        Lines lines = new Lines();
 
         gui.add(label);
         gui.add(lines);
@@ -541,8 +540,7 @@ public class Main {
 
         if (selected == FAKE_BLOCK) {
             requestSelectFakeBlock();
-        }
-        else {
+        } else {
             label.setText(blackMoves + "/" + blackMovesLimit);
             deSelectAll();
         }
