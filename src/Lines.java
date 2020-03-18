@@ -4,6 +4,19 @@ import java.awt.*;
 public class Lines extends JPanel {
     Lines() {
         setSize(500,500);
+        setLayout(null);
+
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 5; y++) {
+                JLabel label = new JLabel(x + "x" + y);
+                label.setFont(new Font("Monospaced", Font.BOLD, 20));
+                label.setSize(100,100);
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setVerticalAlignment(SwingConstants.CENTER);
+                label.setLocation(x*100, (y*100) + 40);
+                add(label);
+            }
+        }
     }
 
     @Override
