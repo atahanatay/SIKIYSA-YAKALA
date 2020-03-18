@@ -64,8 +64,9 @@ public class Main {
 
             int num;
 
-            if (e.getKeyCode() >= 0x60 && e.getKeyCode() <= 0x64 && _level != 3 && _level != 6) {
-                num = e.getKeyCode() - 96;
+            if (((e.getKeyCode() >= 0x60 && e.getKeyCode() <= 0x64) || (e.getKeyCode() >= 0x30 && e.getKeyCode() <= 0x34)) && _level != 3 && _level != 6) {
+                if (e.getKeyCode() >= 0x60 && e.getKeyCode() <= 0x64) num = e.getKeyCode() - 96;
+                else num = e.getKeyCode() - 48;
 
                 if (_level >= 7) {
                     if (turn == 4) _level = 4;
