@@ -682,7 +682,8 @@ public class Main {
     }
 
     public static void blackWin() {
-        label.setText("Siyah Takým Kazandý!");
+        setLabelText("Siyah Takým Kazandý!");
+        _level = 1;
         CubeBLACK.win = true;
         CubeBLACK.t.start();
         setTurn(5);
@@ -690,7 +691,8 @@ public class Main {
     }
 
     public static void redWin() {
-        label.setText("Kýrmýzý Takým Kazandý!");
+        setLabelText("Kýrmýzý Takým Kazandý!");
+        _level = 1;
         CubeRED.win = true;
         CubeRED.t.start();
         setTurn(5);
