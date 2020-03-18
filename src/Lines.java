@@ -9,7 +9,7 @@ public class Lines extends JPanel {
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 5; y++) {
                 JLabel label = new JLabel(x + "x" + y);
-                label.setFont(new Font("Monospaced", Font.BOLD, 20));
+                label.setFont(new Font("Monospaced", Font.ITALIC, 15));
                 label.setSize(100,100);
                 label.setHorizontalAlignment(SwingConstants.CENTER);
                 label.setVerticalAlignment(SwingConstants.CENTER);
