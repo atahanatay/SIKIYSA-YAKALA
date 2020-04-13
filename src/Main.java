@@ -1,9 +1,6 @@
-import javax.sound.midi.SoundbankResource;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 
@@ -46,7 +43,6 @@ public class Main {
     static CubeBLUE blueCube = new CubeBLUE();
     static ArrayList<CubeBLACK> blackCubes = new ArrayList<>();
     static ArrayList<Corner> corners = new ArrayList<>();
-    static ArrayList<CubeGREEN> greenCubes = new ArrayList<>();
 
     static GUI gui = new GUI();
 
@@ -78,9 +74,7 @@ public class Main {
                 else if (_level == 4) moveX = num;
                 else if (_level == 5) moveY = num;
 
-                if (_level < 7) _level++;
-
-                System.out.println("Level:" + _level);
+                _level++;
             } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 if (_level > 1 && _level < 7 && turn != 4) {
                     _level--;
@@ -91,11 +85,8 @@ public class Main {
                 } else if (_level >= 7) {
                     _level = 1;
                 }
-                System.out.println(_level);
             } else if ((_level == 3 || _level == 6) && e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (_level < 7) _level++;
-
-                System.out.println("Level Enter:" + _level);
             }
 
             if (_level == 4) {
@@ -107,8 +98,6 @@ public class Main {
                 else _level = 1;
             } else if (_level >= 7) {
                 Object a = controlGridWithBlock(moveX, moveY, turn == 4);
-
-                System.out.println(a.getClass().getName());
 
                 if (a instanceof CubeGREEN) moveCube((CubeGREEN) a);
                 else if (a instanceof CubeBLUE && turn == 4) requestSelectBlue();
@@ -383,8 +372,6 @@ public class Main {
 
         turn = t;
 
-        System.out.println(t);
-
         if (t == 0) {
             redCube.selectable = true;
             blueCube.selectable = true;
@@ -633,8 +620,6 @@ public class Main {
 
             repaintAll();
         } else if (selected == FAKE_BLOCK) {
-            System.out.println(g.grids.x + " " + g.grids.y);
-
             setPos(fakeBlock, g.grids.x, g.grids.y);
 
             locationX = g.grids.x;
@@ -643,7 +628,6 @@ public class Main {
             fakeBlockStage++;
             setLabelText("Maviye ulaþýn: " + fakeBlockStage + "/" + fakeBlockStageLimit + " - 'O':Ýptal");
 
-            System.out.println("trying find...");
             tryFind();
             pass = true;
 
@@ -916,8 +900,6 @@ public class Main {
     }
 
     public static void continueBlue() {
-        System.out.println("continue blue");
-
         selected = NO;
 
         _level = 1;
